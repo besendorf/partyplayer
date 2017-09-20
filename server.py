@@ -2,10 +2,33 @@ import asyncio
 import websockets
 import json
 import vlc
+from Queue import PriorityQueue
+from __future__ import unicode_literals
+import youtube_dl
 
-conn = psycopg2.connect("dbname=Election user=postgres host='localhost' password=UBahn-Takustraße")
-cur = conn.cursor()
+songs = PriorityQueue()
 
+ydl_opts = {
+    'format': 'bestaudio/best',
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+    'logger': YtLogger(),
+    'progress_hooks': [Yt_hook],
+}
+
+class YtLogger(object):
+    def debug(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        print(msg)
+        
 async def bad_request(websocket):
     dataOut = {'msg': 'bad-request'}
     await websocket.send(dataOut)
@@ -34,12 +57,26 @@ async def process_request(websocket, path):
 
         o = {'msg': i['msg']} # output data
 
-        if i['msg'] == 'blub':
-            o['data'] = blub()
+        if i['msg'] == 'login':
+            o['data'] = login()
+            
+        elif i['msg'] == 'add':
+            o['valid'] = add(i['url'])
         
         dataOut = json.dumps(o)
         await websocket.send(dataOut)
         
+def add(url):
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+    songs.put({
+        'url' : url
+            })
+    
+def Yt_hook(d):
+    if d['status'] == 'finished':
+        print('Done downloading, now converting ...')    
+
 if __name__ == "__main__":
     try:
         start_server = websockets.serve(process_request, 'localhost', 8765)
