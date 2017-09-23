@@ -6,8 +6,11 @@ from Queue import PriorityQueue
 from __future__ import unicode_literals
 import youtube_dl
 
-songs = PriorityQueue()
+class Server(self):
+    self.songs = PriorityQueue()
 
+class songs(self):
+    
 ydl_opts = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -66,14 +69,14 @@ async def process_request(websocket, path):
         dataOut = json.dumps(o)
         await websocket.send(dataOut)
         
-def add(url):
+async def add(url):
+    songs.put(0,url,False) #(PriorityNumber/Votes,Youtube-URL,downloaded)
+        download(url)
+        
+async download(url):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
-    songs.put({
-        'url' : url
-        'votes' : 0
-            })
-    
+        
 def Yt_hook(d):
     if d['status'] == 'finished':
         print('Done downloading, now converting ...')    
