@@ -71,6 +71,7 @@ def add(url):
         ydl.download([url])
     songs.put({
         'url' : url
+        'votes' : 0
             })
     
 def Yt_hook(d):
