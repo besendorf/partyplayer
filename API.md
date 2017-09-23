@@ -1,4 +1,4 @@
-#API
+# API
 
 ## Login
 
@@ -26,3 +26,12 @@ id: 5
 valid: true/false
 count: 6
 
+## list
+### Client
+msg: list
+
+### Server
+songs: 
+    votes:
+    url:
+    downloaded:
